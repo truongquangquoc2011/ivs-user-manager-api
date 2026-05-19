@@ -35,12 +35,12 @@ public class ApplicationConfig {
      */
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> authRepository.findByEmail(username)
+        return username -> authRepository.findAuthUserByEmail(username)
                 .map(user -> org.springframework.security.core.userdetails.User
                         .withUsername(user.getEmail())
                         .password(user.getPassword())
                         /* Check if role exists to avoid NullPointerException */
-                        .authorities(user.getRole() != null ? user.getRole().getName() : "USER")
+                        .authorities("USER")
                         .build())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
     }

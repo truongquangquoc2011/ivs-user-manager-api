@@ -7,10 +7,11 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "users")
-@Getter @Setter
+@Getter
+@Setter
 public class User extends BaseEntity {
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 255)
     private String email;
 
     @Column(nullable = false, length = 500)
@@ -23,9 +24,6 @@ public class User extends BaseEntity {
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
     private UserStatus status = UserStatus.INACTIVE;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id")
-    private Role role;
 }
