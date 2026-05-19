@@ -1,0 +1,148 @@
+package com.ivs.usermanager.modules.group;
+
+import com.ivs.usermanager.common.entity.Group;
+import com.ivs.usermanager.modules.group.dto.GroupRequest;
+import com.ivs.usermanager.modules.group.dto.GroupResponse;
+import com.ivs.usermanager.common.entity.User;
+import com.ivs.usermanager.common.entity.UserGroup;
+import com.ivs.usermanager.modules.group.dto.GroupUserResponse;
+import com.ivs.usermanager.modules.auth.AuthRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class GroupService {
+    private final UserGroupRepository userGroupRepository;
+    private final AuthRepository authRepository;
+    private final GroupRepository groupRepository;
+
+    public List<GroupResponse> getAllGroups() {
+
+        return groupRepository.findAllGroups()
+                .stream()
+                .map(group -> GroupResponse.builder()
+                        .id(group.getId())
+                        .name(group.getName())
+                        .description(group.getDescription())
+                        .isActive(group.getIsActive())
+                        .createdAt(group.getCreatedAt())
+                        .updatedAt(group.getUpdatedAt())
+                        .build())
+                .toList();
+    }
+
+    public GroupResponse createGroup(GroupRequest request) {
+
+        if (groupRepository.countByName(request.getName()) > 0) {
+            throw new RuntimeException("Group name already exists");
+        }
+
+        var group = new Group();
+
+        group.setName(request.getName());
+        group.setDescription(request.getDescription());
+        group.setIsActive(
+                request.getIsActive() != null
+                        ? request.getIsActive()
+                        : true);
+
+        groupRepository.save(group);
+
+        return GroupResponse.builder()
+                .id(group.getId())
+                .name(group.getName())
+                .description(group.getDescription())
+                .isActive(group.getIsActive())
+                .createdAt(group.getCreatedAt())
+                .updatedAt(group.getUpdatedAt())
+                .build();
+    }
+
+    public GroupResponse updateGroup(Integer id, GroupRequest request) {
+
+        var group = groupRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        group.setName(request.getName());
+        group.setDescription(request.getDescription());
+
+        if (request.getIsActive() != null) {
+            group.setIsActive(request.getIsActive());
+        }
+
+        groupRepository.save(group);
+
+        return GroupResponse.builder()
+                .id(group.getId())
+                .name(group.getName())
+                .description(group.getDescription())
+                .isActive(group.getIsActive())
+                .createdAt(group.getCreatedAt())
+                .updatedAt(group.getUpdatedAt())
+                .build();
+    }
+
+    public void deleteGroup(Integer id) {
+
+        var group = groupRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        group.setDeletedAt(LocalDateTime.now());
+
+        groupRepository.save(group);
+    }
+    public List<GroupUserResponse> getUsersInGroup(Integer groupId) {
+
+    groupRepository.findById(groupId)
+            .orElseThrow(() -> new RuntimeException("Group not found"));
+
+    return userGroupRepository.findUsersByGroupId(groupId)
+            .stream()
+            .map(user -> GroupUserResponse.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .fullname(user.getFullname())
+                    .phoneNumber(user.getPhoneNumber())
+                    .status(user.getStatus())
+                    .build())
+            .toList();
+}
+
+public void addUserToGroup(Integer groupId, Integer userId) {
+
+    var group = groupRepository.findById(groupId)
+            .orElseThrow(() -> new RuntimeException("Group not found"));
+
+    var user = authRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    if (userGroupRepository.countActiveUserInGroup(groupId, userId) > 0) {
+        throw new RuntimeException("User already exists in this group");
+    }
+
+    var userGroup = new UserGroup();
+    userGroup.setGroup(group);
+    userGroup.setUser(user);
+
+    userGroupRepository.save(userGroup);
+}
+
+public void removeUserFromGroup(Integer groupId, Integer userId) {
+
+    groupRepository.findById(groupId)
+            .orElseThrow(() -> new RuntimeException("Group not found"));
+
+    authRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    if (userGroupRepository.countActiveUserInGroup(groupId, userId) == 0) {
+        throw new RuntimeException("User is not in this group");
+    }
+
+    userGroupRepository.softDeleteUserFromGroup(groupId, userId);
+}
+}

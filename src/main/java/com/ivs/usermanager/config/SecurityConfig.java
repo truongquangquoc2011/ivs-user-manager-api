@@ -24,17 +24,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            /* Disable CSRF for stateless APIs */
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                /* Method security (@IsPublic) handles public endpoints, 
-                   but we still need to permit options for CORS if needed */
-                .anyRequest().permitAll() 
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                .anyRequest().authenticated()
             )
-            /* Set session management to stateless */
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
             .authenticationProvider(authenticationProvider)
-            /* Add our custom JWT filter before the standard one */
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

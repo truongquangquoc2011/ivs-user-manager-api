@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "groups")
+@Table(name = "user_groups_master")
 @Getter
 @Setter
 public class Group extends BaseEntity {
