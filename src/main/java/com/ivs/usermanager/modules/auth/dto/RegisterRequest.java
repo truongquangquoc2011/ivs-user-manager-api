@@ -14,9 +14,5 @@ public class RegisterRequest {
 
     private String phoneNumber;
 
-    /*
-     * Danh sách group user thuộc vào
-     * VD: ["Admin", "HR"]
-     */
-    private List<String> groups;
+    private Integer groupId;
 }

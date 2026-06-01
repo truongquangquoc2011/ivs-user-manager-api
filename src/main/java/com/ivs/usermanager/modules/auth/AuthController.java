@@ -1,7 +1,9 @@
 package com.ivs.usermanager.modules.auth;
 
 import com.ivs.usermanager.common.decorator.IsPublic;
+import com.ivs.usermanager.common.decorator.RequirePermission;
 import com.ivs.usermanager.common.dto.ApiResponse;
+import com.ivs.usermanager.common.enums.PermissionAction;
 import com.ivs.usermanager.modules.auth.dto.AuthResponse;
 import com.ivs.usermanager.modules.auth.dto.LoginRequest;
 import com.ivs.usermanager.modules.auth.dto.RegisterRequest;
@@ -17,15 +19,14 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    @IsPublic
+    @RequirePermission(feature = "USER_CREATION", action = PermissionAction.EDIT)
     public ResponseEntity<ApiResponse<Object>> register(@RequestBody RegisterRequest request) {
         authService.register(request);
         return ResponseEntity.ok(
-            ApiResponse.builder()
-                .message("User registered successfully")
-                .success(true)
-                .build()
-        );
+                ApiResponse.<Object>builder()
+                        .message("User registered successfully")
+                        .success(true)
+                        .build());
     }
 
     @PostMapping("/login")
@@ -33,11 +34,10 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(
-            ApiResponse.<AuthResponse>builder()
-                .message("Login successful")
-                .data(response)
-                .success(true)
-                .build()
-        );
+                ApiResponse.<AuthResponse>builder()
+                        .message("Login successful")
+                        .data(response)
+                        .success(true)
+                        .build());
     }
 }

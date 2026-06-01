@@ -120,7 +120,6 @@ public class UserService {
     }
 
     public void deleteUser(Integer id) {
-
     var user = userRepository.findActiveEntityById(id)
             .orElseThrow(() -> new RuntimeException("User not found"));
 

@@ -50,7 +50,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
                 g.description AS description,
                 g.is_active AS isActive
             FROM user_groups ug
-            INNER JOIN user_groups_master g
+            INNER JOIN `groups` g
                 ON ug.group_id = g.id
                 AND g.deleted_at IS NULL
             WHERE ug.user_id = :userId
