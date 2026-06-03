@@ -17,6 +17,8 @@ public class ProfileResponse {
 
     private String phoneNumber;
 
+    private String avatar;
+    
     private String status;
 
     private List<ProfileGroupResponse> groups;

@@ -9,6 +9,7 @@ import com.ivs.usermanager.modules.user.dto.UserRequest;
 import java.util.List;
 import com.ivs.usermanager.common.decorator.RequirePermission;
 import com.ivs.usermanager.common.enums.PermissionAction;
+import com.ivs.usermanager.common.dto.PaginationResponse;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -19,12 +20,14 @@ public class UserController {
 
         @GetMapping
         @RequirePermission(feature = "USER_MANAGEMENT", action = PermissionAction.VIEW)
-        public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
+        public ResponseEntity<ApiResponse<PaginationResponse<UserResponse>>> getAllUsers(
+                        @RequestParam(defaultValue = "0") Integer skip,
+                        @RequestParam(defaultValue = "10") Integer take) {
                 return ResponseEntity.ok(
-                                ApiResponse.<List<UserResponse>>builder()
+                                ApiResponse.<PaginationResponse<UserResponse>>builder()
                                                 .success(true)
                                                 .message("Get users successfully")
-                                                .data(userService.getAllUsers())
+                                                .data(userService.getAllUsersPaging(skip, take))
                                                 .build());
         }
 
@@ -79,4 +82,5 @@ public class UserController {
                                                 .message("Delete user successfully")
                                                 .build());
         }
+
 }

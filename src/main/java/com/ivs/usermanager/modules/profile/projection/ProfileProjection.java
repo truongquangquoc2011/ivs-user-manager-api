@@ -11,4 +11,6 @@ public interface ProfileProjection {
     String getPhoneNumber();
 
     String getStatus();
+
+    String getAvatar();
 }

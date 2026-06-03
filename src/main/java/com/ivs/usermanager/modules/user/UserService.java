@@ -2,6 +2,8 @@ package com.ivs.usermanager.modules.user;
 
 import com.ivs.usermanager.modules.user.dto.UserGroupResponse;
 import com.ivs.usermanager.modules.user.dto.UserResponse;
+import com.ivs.usermanager.modules.user.projection.UserGroupProjection;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.ivs.usermanager.common.entity.User;
@@ -11,7 +13,7 @@ import com.ivs.usermanager.modules.group.GroupRepository;
 import com.ivs.usermanager.modules.group.UserGroupRepository;
 import com.ivs.usermanager.modules.user.dto.UserRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
+import com.ivs.usermanager.common.dto.PaginationResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -96,60 +98,122 @@ public class UserService {
         var user = userRepository.findActiveEntityById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (userRepository.countByEmailExceptId(request.getEmail(), id) > 0) {
-            throw new RuntimeException("Email already exists");
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            if (userRepository.countByEmailExceptId(request.getEmail(), id) > 0) {
+                throw new RuntimeException("Email already exists");
+            }
+            user.setEmail(request.getEmail());
         }
 
-        user.setEmail(request.getEmail());
-        user.setFullname(request.getFullname());
-        user.setPhoneNumber(request.getPhoneNumber());
+        if (request.getFullname() != null) {
+            user.setFullname(request.getFullname());
+        }
+
+        if (request.getPhoneNumber() != null) {
+            user.setPhoneNumber(request.getPhoneNumber());
+        }
 
         if (request.getStatus() != null) {
             user.setStatus(UserStatus.valueOf(request.getStatus()));
         }
 
-        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+        if (request.getPassword() != null) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
         userRepository.save(user);
 
-        syncUserGroups(user, request.getGroupIds());
+        if (request.getGroupIds() != null) {
+            syncUserGroups(user, request.getGroupIds());
+        }
 
         return getUserById(user.getId());
     }
 
     public void deleteUser(Integer id) {
-    var user = userRepository.findActiveEntityById(id)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+        var user = userRepository.findActiveEntityById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-    user.setDeletedAt(LocalDateTime.now());
+        user.setDeletedAt(LocalDateTime.now());
 
-    user.setEmail(user.getEmail() + "_deleted_" + System.currentTimeMillis());
+        user.setEmail(user.getEmail() + "_deleted_" + System.currentTimeMillis());
 
-    userRepository.save(user);
-}
+        userRepository.save(user);
+    }
 
     private void syncUserGroups(User user, List<Integer> groupIds) {
 
-        if (groupIds == null) {
+        if (groupIds == null || groupIds.isEmpty()) {
             return;
         }
 
-        // Xóa mềm toàn bộ group cũ của user
+        Integer newGroupId = groupIds.get(0);
+
+        List<UserGroupProjection> currentGroups = userRepository.findGroupsByUserId(user.getId());
+
+        boolean sameGroup = currentGroups.stream()
+                .anyMatch(group -> group.getId().equals(newGroupId));
+
+        if (sameGroup) {
+            return;
+        }
+
         userGroupRepository.softDeleteAllByUserId(user.getId());
 
-        // Thêm lại các group mới
-        for (Integer groupId : groupIds) {
+        var group = groupRepository.findById(newGroupId)
+                .orElseThrow(() -> new RuntimeException("Group not found: " + newGroupId));
 
-            var group = groupRepository.findById(groupId)
-                    .orElseThrow(() -> new RuntimeException("Group not found: " + groupId));
+        var oldUserGroup = userGroupRepository.findAnyByUserIdAndGroupId(
+                user.getId(),
+                newGroupId);
 
-            var userGroup = new UserGroup();
-            userGroup.setUser(user);
-            userGroup.setGroup(group);
-
+        if (oldUserGroup.isPresent()) {
+            var userGroup = oldUserGroup.get();
+            userGroup.setDeletedAt(null);
             userGroupRepository.save(userGroup);
+            return;
         }
+
+        var userGroup = new UserGroup();
+        userGroup.setUser(user);
+        userGroup.setGroup(group);
+
+        userGroupRepository.save(userGroup);
+    }
+
+    public PaginationResponse<UserResponse> getAllUsersPaging(Integer skip, Integer take) {
+
+        if (skip == null || skip < 0) {
+            skip = 0;
+        }
+
+        if (take == null || take <= 0) {
+            take = 10;
+        }
+
+        if (take > 100) {
+            take = 100;
+        }
+
+        var items = userRepository.findAllUsersPaging(skip, take)
+                .stream()
+                .map(user -> UserResponse.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .fullname(user.getFullname())
+                        .phoneNumber(user.getPhoneNumber())
+                        .status(user.getStatus())
+                        .groups(getGroupsByUserId(user.getId()))
+                        .createdAt(user.getCreatedAt())
+                        .updatedAt(user.getUpdatedAt())
+                        .build())
+                .toList();
+
+        return PaginationResponse.<UserResponse>builder()
+                .items(items)
+                .total(userRepository.countAllUsers())
+                .skip(skip)
+                .take(take)
+                .build();
     }
 }
