@@ -18,6 +18,10 @@ public class AuthController {
 
     private final AuthService authService;
 
+    /**
+     * * Registers a new user. * * @param request registration request data
+     * * @return success response
+     */
     @PostMapping("/register")
     @RequirePermission(feature = "USER_CREATION", action = PermissionAction.EDIT)
     public ResponseEntity<ApiResponse<Object>> register(@RequestBody RegisterRequest request) {
@@ -29,6 +33,11 @@ public class AuthController {
                         .build());
     }
 
+    /**
+     * * Authenticates a user and returns an access token.
+     * * @param request login
+     * credentials * @return authentication response
+     */
     @PostMapping("/login")
     @IsPublic
     public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody LoginRequest request) {

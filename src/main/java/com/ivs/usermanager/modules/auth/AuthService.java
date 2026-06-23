@@ -28,6 +28,12 @@ public class AuthService {
     private final GroupRepository groupRepository;
     private final UserGroupRepository userGroupRepository;
 
+    /**
+     * Registers a new user and assigns the user to a group.
+     *
+     * @param request registration request data
+     * @return success message
+     */
     @Transactional
     public String register(RegisterRequest request) {
 
@@ -62,7 +68,14 @@ public class AuthService {
         return "User registered successfully";
     }
 
+    /**
+     * Authenticates a user and generates a JWT access token.
+     *
+     * @param request login credentials
+     * @return authentication response containing the access token
+     */
     public AuthResponse login(LoginRequest request) {
+        // Delegate credential validation to Spring Security before loading user details
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
