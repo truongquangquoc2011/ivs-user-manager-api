@@ -71,6 +71,10 @@ public class AuthService {
         var user = authRepository.findAuthUserByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        if (!UserStatus.ACTIVE.name().equals(user.getStatus())) {
+            throw new RuntimeException("User is not active");
+        }
+
         var jwtToken = jwtService.generateToken(new HashMap<>(), user.getEmail());
 
         return AuthResponse.builder()
