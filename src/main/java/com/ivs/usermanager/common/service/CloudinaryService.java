@@ -11,6 +11,9 @@ import java.text.Normalizer;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Service responsible for uploading images to Cloudinary.
+ */
 @Service
 @RequiredArgsConstructor
 public class CloudinaryService {
@@ -29,6 +32,16 @@ public class CloudinaryService {
             "image/webp"
     );
 
+    /**
+     * Uploads an avatar image to Cloudinary.
+     *
+     * <p>
+     * Validation rules:
+     *
+     * @param file avatar image file
+     * @return secure URL of the uploaded image
+     * @throws RuntimeException if validation fails or upload fails
+     */
     public String uploadAvatar(MultipartFile file) {
 
         if (file == null || file.isEmpty()) {
@@ -66,7 +79,23 @@ public class CloudinaryService {
         }
     }
 
+    /**
+     * Generates a sanitized public ID from the original file name.
+     *
+     * <p>
+     * The generated ID:
+     * <ul>
+     *     <li>Removes file extension.</li>
+     *     <li>Removes accents and special characters.</li>
+     *     <li>Converts spaces and underscores to hyphens.</li>
+     *     <li>Limits length to 120 characters.</li>
+     * </ul>
+     *
+     * @param originalName original file name
+     * @return sanitized public ID
+     */
     private String generatePublicId(String originalName) {
+
         if (originalName == null || originalName.isBlank()) {
             return "avatar";
         }
@@ -75,12 +104,15 @@ public class CloudinaryService {
 
         int dotIndex = name.lastIndexOf(".");
         if (dotIndex > 0) {
+            // Remove file extension before generating the public ID
             name = name.substring(0, dotIndex);
         }
 
+        // Convert accented characters (e.g. tiếng Việt) to ASCII characters
         String normalized = Normalizer.normalize(name, Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "");
 
+        // Normalize the file name to make it URL-safe and Cloudinary-friendly
         String publicId = normalized
                 .trim()
                 .toLowerCase()
@@ -88,6 +120,7 @@ public class CloudinaryService {
                 .replaceAll("[^a-z0-9-]+", "")
                 .replaceAll("-+", "-");
 
+        // Cloudinary public IDs should not be excessively long
         if (publicId.length() > 120) {
             publicId = publicId.substring(0, 120);
         }

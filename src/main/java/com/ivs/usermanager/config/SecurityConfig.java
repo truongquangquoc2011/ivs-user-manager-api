@@ -73,6 +73,7 @@ public class SecurityConfig {
         String contextPath = request.getContextPath();
 
         if (contextPath != null && !contextPath.isBlank()) {
+            // Remove context path to match controller mappings correctly
             path = path.substring(contextPath.length());
         }
 
