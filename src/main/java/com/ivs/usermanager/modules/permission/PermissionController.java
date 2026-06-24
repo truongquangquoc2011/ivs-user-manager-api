@@ -18,6 +18,12 @@ public class PermissionController {
 
     private final PermissionService permissionService;
 
+    /**
+     * Retrieves permissions of a group.
+     *
+     * @param groupId group ID
+     * @return list of permissions
+     */
     @GetMapping
     @RequirePermission(feature = "PERMISSION_MANAGEMENT", action = PermissionAction.VIEW)
     public ResponseEntity<ApiResponse<List<GroupPermissionResponse>>> getGroupPermissions(
@@ -30,6 +36,13 @@ public class PermissionController {
                         .build());
     }
 
+    /**
+     * Updates permissions of a group.
+     *
+     * @param groupId group ID
+     * @param requests permission data
+     * @return operation result
+     */
     @PutMapping
      @RequirePermission(
             feature = "PERMISSION_MANAGEMENT",

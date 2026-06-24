@@ -15,6 +15,11 @@ public class PermissionAspect {
 
     private final PermissionCheckerService permissionCheckerService;
 
+    /**
+     * Checks user permission before method execution.
+     *
+     * @param requirePermission required permission
+     */
     @Before("@annotation(requirePermission)")
     public void checkPermission(RequirePermission requirePermission) {
 

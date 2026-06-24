@@ -10,8 +10,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Repository for group permission data access.
+ */
 public interface GroupPermissionRepository extends JpaRepository<GroupPermission, Integer> {
 
+    /**
+     * Retrieves permissions by group ID.
+     *
+     * @param groupId group ID
+     * @return list of permissions
+     */
     @Query(value = """
             SELECT
                 f.id AS featureId,
@@ -32,6 +41,11 @@ public interface GroupPermissionRepository extends JpaRepository<GroupPermission
     List<GroupPermissionProjection> findPermissionsByGroupId(
             @Param("groupId") Integer groupId);
 
+    /**
+     * Deletes all permissions of a group.
+     *
+     * @param groupId group ID
+     */
     @Modifying
     @Transactional
     @Query(value = """

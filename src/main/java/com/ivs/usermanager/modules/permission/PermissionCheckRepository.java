@@ -6,6 +6,14 @@ import org.springframework.data.repository.Repository;
 
 public interface PermissionCheckRepository extends Repository<com.ivs.usermanager.common.entity.User, Integer> {
 
+    /**
+     * Counts user permissions by feature and action.
+     *
+     * @param email user email
+     * @param featureCode feature code
+     * @param action permission action
+     * @return number of matching permissions
+     */
     @Query(value = """
         SELECT COUNT(1)
         FROM users u

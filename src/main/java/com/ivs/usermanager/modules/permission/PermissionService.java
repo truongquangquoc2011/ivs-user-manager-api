@@ -18,6 +18,12 @@ public class PermissionService {
     private final FeatureRepository featureRepository;
     private final GroupPermissionRepository groupPermissionRepository;
 
+    /**
+     * Retrieves permissions of a group.
+     *
+     * @param groupId group ID
+     * @return list of permissions
+     */
     public List<GroupPermissionResponse> getGroupPermissions(Integer groupId) {
 
         groupRepository.findActiveEntityById(groupId)
@@ -36,6 +42,12 @@ public class PermissionService {
                 .toList();
     }
 
+    /**
+     * Updates permissions of a group.
+     *
+     * @param groupId group ID
+     * @param requests permission data
+     */
     public void updateGroupPermissions(
             Integer groupId,
             List<GroupPermissionRequest> requests
