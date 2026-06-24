@@ -9,12 +9,20 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Service for feature management.
+ */
 @Service
 @RequiredArgsConstructor
 public class FeatureService {
 
     private final FeatureRepository featureRepository;
 
+    /**
+     * Retrieves all features.
+     *
+     * @return list of features
+     */
     public List<FeatureResponse> getAllFeatures() {
         return featureRepository.findAllFeatures()
                 .stream()
@@ -22,6 +30,12 @@ public class FeatureService {
                 .toList();
     }
 
+    /**
+     * Retrieves a feature by ID.
+     *
+     * @param id feature ID
+     * @return feature details
+     */
     public FeatureResponse getFeatureById(Integer id) {
         var feature = featureRepository.findFeatureById(id)
                 .orElseThrow(() -> new RuntimeException("Feature not found"));
@@ -29,6 +43,12 @@ public class FeatureService {
         return toResponse(feature);
     }
 
+    /**
+     * Creates a new feature.
+     *
+     * @param request feature data
+     * @return created feature
+     */
     public FeatureResponse createFeature(FeatureRequest request) {
         if (featureRepository.countByCode(request.getCode()) > 0) {
             throw new RuntimeException("Feature code already exists");
@@ -45,6 +65,13 @@ public class FeatureService {
         return getFeatureById(feature.getId());
     }
 
+    /**
+     * Updates a feature by ID.
+     *
+     * @param id feature ID
+     * @param request updated feature data
+     * @return updated feature
+     */
     public FeatureResponse updateFeature(Integer id, FeatureRequest request) {
         var feature = featureRepository.findActiveEntityById(id)
                 .orElseThrow(() -> new RuntimeException("Feature not found"));
@@ -66,6 +93,11 @@ public class FeatureService {
         return getFeatureById(feature.getId());
     }
 
+    /**
+     * Deletes a feature by ID.
+     *
+     * @param id feature ID
+     */
     public void deleteFeature(Integer id) {
         var feature = featureRepository.findActiveEntityById(id)
                 .orElseThrow(() -> new RuntimeException("Feature not found"));
@@ -77,6 +109,12 @@ public class FeatureService {
         featureRepository.save(feature);
     }
 
+    /**
+     * Converts a feature projection to a response object.
+     *
+     * @param feature feature projection
+     * @return feature response
+     */
     private FeatureResponse toResponse(com.ivs.usermanager.modules.feature.projection.FeatureProjection feature) {
         return FeatureResponse.builder()
                 .id(feature.getId())
