@@ -11,6 +11,11 @@ import java.util.Optional;
 
 public interface GroupRepository extends JpaRepository<Group, Integer> {
 
+    /**
+     * Retrieves all active groups.
+     *
+     * @return list of groups
+     */
     @Query(value = """
             SELECT
                 g.id AS id,
@@ -25,6 +30,12 @@ public interface GroupRepository extends JpaRepository<Group, Integer> {
             """, nativeQuery = true)
     List<GroupProjection> findAllGroups();
 
+    /**
+     * Retrieves a group by ID.
+     *
+     * @param id group ID
+     * @return group details
+     */
     @Query(value = """
             SELECT
                 g.id AS id,
@@ -40,6 +51,12 @@ public interface GroupRepository extends JpaRepository<Group, Integer> {
             """, nativeQuery = true)
     Optional<GroupProjection> findGroupById(@Param("id") Integer id);
 
+    /**
+     * Counts groups with the given name.
+     *
+     * @param name group name
+     * @return number of matching groups
+     */
     @Query(value = """
             SELECT COUNT(1)
             FROM `groups` g
@@ -48,6 +65,12 @@ public interface GroupRepository extends JpaRepository<Group, Integer> {
             """, nativeQuery = true)
     Long countByName(@Param("name") String name);
 
+    /**
+     * Retrieves an active group entity by ID.
+     *
+     * @param id group ID
+     * @return group entity
+     */
     @Query(value = """
             SELECT *
             FROM `groups` g

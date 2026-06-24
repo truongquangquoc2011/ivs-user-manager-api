@@ -20,6 +20,11 @@ public class GroupService {
     private final AuthRepository authRepository;
     private final GroupRepository groupRepository;
 
+    /**
+     * Retrieves all groups.
+     *
+     * @return list of groups
+     */
     public List<GroupResponse> getAllGroups() {
 
         return groupRepository.findAllGroups()
@@ -35,6 +40,12 @@ public class GroupService {
                 .toList();
     }
 
+    /**
+     * Creates a new group.
+     *
+     * @param request group data
+     * @return created group
+     */
     public GroupResponse createGroup(GroupRequest request) {
 
         if (groupRepository.countByName(request.getName()) > 0) {
@@ -62,6 +73,13 @@ public class GroupService {
                 .build();
     }
 
+    /**
+     * Updates a group by ID.
+     *
+     * @param id group ID
+     * @param request updated group data
+     * @return updated group
+     */
     public GroupResponse updateGroup(Integer id, GroupRequest request) {
 
         var group = groupRepository.findById(id)
@@ -86,6 +104,11 @@ public class GroupService {
                 .build();
     }
 
+    /**
+     * Deletes a group by ID.
+     *
+     * @param id group ID
+     */
     public void deleteGroup(Integer id) {
 
         var group = groupRepository.findById(id)
@@ -95,6 +118,13 @@ public class GroupService {
 
         groupRepository.save(group);
     }
+
+    /**
+     * Retrieves users in a group.
+     *
+     * @param groupId group ID
+     * @return list of users
+     */
     public List<GroupUserResponse> getUsersInGroup(Integer groupId) {
 
     groupRepository.findById(groupId)
@@ -112,6 +142,12 @@ public class GroupService {
             .toList();
 }
 
+    /**
+     * Adds a user to a group.
+     *
+     * @param groupId group ID
+     * @param userId user ID
+     */
 public void addUserToGroup(Integer groupId, Integer userId) {
 
     var group = groupRepository.findById(groupId)
@@ -120,7 +156,7 @@ public void addUserToGroup(Integer groupId, Integer userId) {
     var user = authRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-    if (userGroupRepository.countActiveUserInGroup(groupId, userId) > 0) {
+         if (userGroupRepository.countActiveUserInGroup(groupId, userId) > 0) {
         throw new RuntimeException("User already exists in this group");
     }
 
@@ -131,7 +167,13 @@ public void addUserToGroup(Integer groupId, Integer userId) {
     userGroupRepository.save(userGroup);
 }
 
-public void removeUserFromGroup(Integer groupId, Integer userId) {
+    /**
+     * Removes a user from a group.
+     *
+     * @param groupId group ID
+     * @param userId user ID
+     */
+    public void removeUserFromGroup(Integer groupId, Integer userId) {
 
     groupRepository.findById(groupId)
             .orElseThrow(() -> new RuntimeException("Group not found"));

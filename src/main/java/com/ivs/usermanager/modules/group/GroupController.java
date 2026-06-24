@@ -18,6 +18,11 @@ public class GroupController {
 
         private final GroupService groupService;
 
+        /**
+         * Retrieves all groups.
+         *
+         * @return list of groups
+         */
         @GetMapping
         @RequirePermission(feature = "GROUP_MANAGEMENT", action = PermissionAction.VIEW)
         public ResponseEntity<ApiResponse<List<GroupResponse>>> getAllGroups() {
@@ -30,6 +35,12 @@ public class GroupController {
                                                 .build());
         }
 
+        /**
+         * Creates a new group.
+         *
+         * @param request group data
+         * @return created group
+         */
         @PostMapping
         @RequirePermission(feature = "GROUP_MANAGEMENT", action = PermissionAction.EDIT)
         public ResponseEntity<ApiResponse<GroupResponse>> createGroup(
@@ -43,6 +54,13 @@ public class GroupController {
                                                 .build());
         }
 
+        /**
+         * Updates a group by ID.
+         *
+         * @param id group ID
+         * @param request updated group data
+         * @return updated group
+         */
         @PutMapping("/{id}")
         @RequirePermission(feature = "GROUP_MANAGEMENT", action = PermissionAction.EDIT)
         public ResponseEntity<ApiResponse<GroupResponse>> updateGroup(
@@ -57,6 +75,12 @@ public class GroupController {
                                                 .build());
         }
 
+        /**
+         * Deletes a group by ID.
+         *
+         * @param id group ID
+         * @return operation result
+         */
         @DeleteMapping("/{id}")
         @RequirePermission(feature = "GROUP_MANAGEMENT", action = PermissionAction.EDIT)
         public ResponseEntity<ApiResponse<Object>> deleteGroup(
@@ -71,6 +95,12 @@ public class GroupController {
                                                 .build());
         }
 
+        /**
+         * Retrieves users in a group.
+         *
+         * @param groupId group ID
+         * @return list of users
+         */
         @GetMapping("/{groupId}/users")
         @RequirePermission(feature = "GROUP_MANAGEMENT", action = PermissionAction.VIEW)
         public ResponseEntity<ApiResponse<List<GroupUserResponse>>> getUsersInGroup(
@@ -83,6 +113,13 @@ public class GroupController {
                                                 .build());
         }
 
+        /**
+         * Adds a user to a group.
+         *
+         * @param groupId group ID
+         * @param userId user ID
+         * @return operation result
+         */
         @PostMapping("/{groupId}/users/{userId}")
         @RequirePermission(feature = "GROUP_MANAGEMENT", action = PermissionAction.EDIT)
         public ResponseEntity<ApiResponse<Object>> addUserToGroup(
@@ -97,6 +134,13 @@ public class GroupController {
                                                 .build());
         }
 
+        /**
+         * Removes a user from a group.
+         *
+         * @param groupId group ID
+         * @param userId user ID
+         * @return operation result
+         */
         @DeleteMapping("/{groupId}/users/{userId}")
         @RequirePermission(feature = "GROUP_MANAGEMENT", action = PermissionAction.EDIT)
         public ResponseEntity<ApiResponse<Object>> removeUserFromGroup(
