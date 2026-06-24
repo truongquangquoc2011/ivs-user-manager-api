@@ -12,6 +12,12 @@ import java.util.Optional;
 
 public interface UserGroupRepository extends JpaRepository<UserGroup, Integer> {
 
+        /**
+         * Retrieves users in a group.
+         *
+         * @param groupId group ID
+         * @return list of users
+         */
         @Query(value = """
                         SELECT
                             u.id AS id,
@@ -29,6 +35,13 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Integer> {
                         """, nativeQuery = true)
         List<GroupUserProjection> findUsersByGroupId(@Param("groupId") Integer groupId);
 
+        /**
+         * Counts active users in a group.
+         *
+         * @param groupId group ID
+         * @param userId user ID
+         * @return number of matching records
+         */
         @Query(value = """
                         SELECT COUNT(1)
                         FROM user_groups ug
@@ -40,6 +53,12 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Integer> {
                         @Param("groupId") Integer groupId,
                         @Param("userId") Integer userId);
 
+        /**
+         * Soft deletes a user from a group.
+         *
+         * @param groupId group ID
+         * @param userId user ID
+         */
         @Modifying
         @Transactional
         @Query(value = """
@@ -53,6 +72,11 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Integer> {
                         @Param("groupId") Integer groupId,
                         @Param("userId") Integer userId);
 
+        /**
+         * Soft deletes all group assignments of a user.
+         *
+         * @param userId user ID
+         */
         @Modifying
         @Transactional
         @Query(value = """
@@ -63,6 +87,13 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Integer> {
                         """, nativeQuery = true)
         void softDeleteAllByUserId(@Param("userId") Integer userId);
 
+        /**
+         * Retrieves a user-group mapping.
+         *
+         * @param userId user ID
+         * @param groupId group ID
+         * @return user-group mapping
+         */
         @Query(value = """
                         SELECT *
                         FROM user_groups ug
