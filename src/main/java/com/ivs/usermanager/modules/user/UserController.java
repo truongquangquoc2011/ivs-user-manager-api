@@ -18,6 +18,13 @@ public class UserController {
 
         private final UserService userService;
 
+        /**
+         * Retrieves users with pagination.
+         *
+         * @param skip number of records to skip
+         * @param take number of records to retrieve
+         * @return paginated user list
+         */
         @GetMapping
         @RequirePermission(feature = "USER_MANAGEMENT", action = PermissionAction.VIEW)
         public ResponseEntity<ApiResponse<PaginationResponse<UserResponse>>> getAllUsers(
@@ -31,6 +38,12 @@ public class UserController {
                                                 .build());
         }
 
+        /**
+         * Retrieves a user by ID.
+         *
+         * @param id user ID
+         * @return user details
+         */
         @GetMapping("/{id}")
         @RequirePermission(feature = "USER_MANAGEMENT", action = PermissionAction.VIEW)
         public ResponseEntity<ApiResponse<UserResponse>> getUserById(
@@ -42,6 +55,7 @@ public class UserController {
                                                 .data(userService.getUserById(id))
                                                 .build());
         }
+
         // @PostMapping
         // @RequirePermission(feature = "USER_MANAGEMENT", action =
         // PermissionAction.EDIT)
@@ -57,6 +71,13 @@ public class UserController {
         // );
         // }
 
+        /**
+         * Updates a user.
+         *
+         * @param id user ID
+         * @param request user data
+         * @return updated user
+         */
         @PutMapping("/{id}")
         @RequirePermission(feature = "USER_MANAGEMENT", action = PermissionAction.EDIT)
         public ResponseEntity<ApiResponse<UserResponse>> updateUser(
@@ -70,6 +91,12 @@ public class UserController {
                                                 .build());
         }
 
+        /**
+         * Deletes a user.
+         *
+         * @param id user ID
+         * @return operation result
+         */
         @DeleteMapping("/{id}")
         @RequirePermission(feature = "USER_MANAGEMENT", action = PermissionAction.EDIT)
         public ResponseEntity<ApiResponse<Object>> deleteUser(

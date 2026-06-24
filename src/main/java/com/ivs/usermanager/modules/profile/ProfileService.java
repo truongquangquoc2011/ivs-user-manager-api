@@ -20,6 +20,12 @@ public class ProfileService {
         private final PasswordEncoder passwordEncoder;
         private final CloudinaryService cloudinaryService;
 
+        /**
+         * Retrieves profile information.
+         *
+         * @param email user email
+         * @return profile details
+         */
         public ProfileResponse getProfile(String email) {
 
                 var profile = profileRepository.findProfileByEmail(email)
@@ -41,6 +47,7 @@ public class ProfileService {
                                                 .featureCode(permission.getFeatureCode())
                                                 .featureName(permission.getFeatureName())
                                                 .featurePath(permission.getFeaturePath())
+                                                // Prevent NullPointerException when database value is null
                                                 .canView(Boolean.TRUE.equals(permission.getCanView()))
                                                 .canEdit(Boolean.TRUE.equals(permission.getCanEdit()))
                                                 .build())
@@ -58,6 +65,13 @@ public class ProfileService {
                                 .build();
         }
 
+        /**
+         * Updates profile information.
+         *
+         * @param email   user email
+         * @param request profile data
+         * @return updated profile
+         */
         public ProfileResponse updateProfile(String email, UpdateProfileRequest request) {
 
                 var user = profileRepository.findActiveEntityByEmail(email)
@@ -80,6 +94,12 @@ public class ProfileService {
                 return getProfile(email);
         }
 
+        /**
+         * Changes the user password.
+         *
+         * @param email   user email
+         * @param request password data
+         */
         public void changePassword(String email, ChangePasswordRequest request) {
 
                 var user = profileRepository.findActiveEntityByEmail(email)
@@ -100,21 +120,28 @@ public class ProfileService {
                 if (!request.getNewPassword().equals(request.getConfirmPassword())) {
                         throw new RuntimeException("Confirm password does not match");
                 }
-
+                // Compare raw password with encrypted password
                 if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
                         throw new RuntimeException("Old password is incorrect");
                 }
-
+                // Store password in encrypted form
                 user.setPassword(passwordEncoder.encode(request.getNewPassword()));
 
                 profileRepository.save(user);
         }
 
+        /**
+         * Uploads a user avatar.
+         *
+         * @param email user email
+         * @param file  avatar file
+         * @return uploaded avatar information
+         */
         public AvatarUploadResponse uploadAvatar(String email, MultipartFile file) {
 
                 var user = profileRepository.findActiveEntityByEmail(email)
                                 .orElseThrow(() -> new RuntimeException("Profile not found"));
-
+                // Upload file to Cloudinary and get public URL
                 String avatarUrl = cloudinaryService.uploadAvatar(file);
 
                 user.setAvatar(avatarUrl);

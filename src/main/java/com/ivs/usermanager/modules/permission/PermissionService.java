@@ -36,6 +36,7 @@ public class PermissionService {
                         .featureCode(permission.getFeatureCode())
                         .featureName(permission.getFeatureName())
                         .featurePath(permission.getFeaturePath())
+                        // Convert database values (0/1) to boolean
                         .canView(permission.getCanView() != null && permission.getCanView() == 1)
                         .canEdit(permission.getCanEdit() != null && permission.getCanEdit() == 1)
                         .build())
@@ -56,6 +57,7 @@ public class PermissionService {
         var group = groupRepository.findActiveEntityById(groupId)
                 .orElseThrow(() -> new RuntimeException("Group not found"));
 
+        // Remove existing permissions before assigning new ones
         groupPermissionRepository.deleteAllByGroupId(groupId);
 
         for (GroupPermissionRequest request : requests) {
@@ -69,6 +71,7 @@ public class PermissionService {
 
             permission.setGroup(group);
             permission.setFeature(feature);
+            // Default permission to false when value is not provided
             permission.setCanView(
                     request.getCanView() != null ? request.getCanView() : false
             );

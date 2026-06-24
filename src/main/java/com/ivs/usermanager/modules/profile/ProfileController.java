@@ -18,6 +18,12 @@ public class ProfileController {
 
     private final ProfileService profileService;
 
+    /**
+     * Retrieves the current user's profile.
+     *
+     * @param authentication authenticated user
+     * @return profile details
+     */
     @GetMapping
     public ResponseEntity<ApiResponse<ProfileResponse>> getProfile(
             Authentication authentication) {
@@ -31,6 +37,13 @@ public class ProfileController {
                         .build());
     }
 
+    /**
+     * Updates the current user's profile.
+     *
+     * @param authentication authenticated user
+     * @param request profile data
+     * @return updated profile
+     */
     @PutMapping
     public ResponseEntity<ApiResponse<ProfileResponse>> updateProfile(
             Authentication authentication,
@@ -45,6 +58,13 @@ public class ProfileController {
                         .build());
     }
 
+    /**
+     * Changes the current user's password.
+     *
+     * @param authentication authenticated user
+     * @param request password data
+     * @return operation result
+     */
     @PutMapping("/change-password")
     public ResponseEntity<ApiResponse<Object>> changePassword(
             Authentication authentication,
@@ -60,6 +80,13 @@ public class ProfileController {
                         .build());
     }
 
+    /**
+     * Uploads a user avatar.
+     *
+     * @param authentication authenticated user
+     * @param file avatar file
+     * @return uploaded avatar information
+     */
     @PostMapping("/avatar")
     public ResponseEntity<ApiResponse<AvatarUploadResponse>> uploadAvatar(
             Authentication authentication,

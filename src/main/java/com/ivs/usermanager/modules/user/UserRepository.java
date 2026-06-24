@@ -12,6 +12,11 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
 
+        /**
+         * Retrieves all users.
+         *
+         * @return list of users
+         */
         @Query(value = """
                         SELECT
                             u.id AS id,
@@ -27,6 +32,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
                         """, nativeQuery = true)
         List<UserProjection> findAllUsers();
 
+        /**
+         * Retrieves a user by ID.
+         *
+         * @param id user ID
+         * @return user details
+         */
         @Query(value = """
                         SELECT
                             u.id AS id,
@@ -43,6 +54,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
                         """, nativeQuery = true)
         Optional<UserProjection> findUserById(@Param("id") Integer id);
 
+        /**
+         * Retrieves groups of a user.
+         *
+         * @param userId user ID
+         * @return list of groups
+         */
         @Query(value = """
                         SELECT
                             g.id AS id,
@@ -59,6 +76,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
                         """, nativeQuery = true)
         List<UserGroupProjection> findGroupsByUserId(@Param("userId") Integer userId);
 
+        /**
+         * Counts users by email.
+         *
+         * @param email user email
+         * @return number of matching users
+         */
         @Query(value = """
                         SELECT COUNT(1)
                         FROM users u
@@ -67,6 +90,13 @@ public interface UserRepository extends JpaRepository<User, Integer> {
                         """, nativeQuery = true)
         Long countByEmail(@Param("email") String email);
 
+        /**
+         * Counts users by email excluding the specified ID.
+         *
+         * @param email user email
+         * @param id user ID
+         * @return number of matching users
+         */
         @Query(value = """
                         SELECT COUNT(1)
                         FROM users u
@@ -78,6 +108,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
                         @Param("email") String email,
                         @Param("id") Integer id);
 
+        /**
+         * Retrieves an active user entity by ID.
+         *
+         * @param id user ID
+         * @return user entity
+         */
         @Query(value = """
                         SELECT *
                         FROM users u
@@ -87,6 +123,13 @@ public interface UserRepository extends JpaRepository<User, Integer> {
                         """, nativeQuery = true)
         Optional<User> findActiveEntityById(@Param("id") Integer id);
 
+        /**
+         * Retrieves users with pagination.
+         *
+         * @param skip number of records to skip
+         * @param take number of records to retrieve
+         * @return paginated user list
+         */
         @Query(value = """
                         SELECT
                             u.id AS id,
@@ -105,6 +148,11 @@ public interface UserRepository extends JpaRepository<User, Integer> {
                         @Param("skip") Integer skip,
                         @Param("take") Integer take);
 
+        /**
+         * Counts all active users.
+         *
+         * @return total number of users
+         */
         @Query(value = """
                         SELECT COUNT(1)
                         FROM users u

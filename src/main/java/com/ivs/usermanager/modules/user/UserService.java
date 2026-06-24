@@ -25,6 +25,11 @@ public class UserService {
     private final UserGroupRepository userGroupRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Retrieves all users.
+     *
+     * @return list of users
+     */
     public List<UserResponse> getAllUsers() {
         return userRepository.findAllUsers()
                 .stream()
@@ -41,6 +46,12 @@ public class UserService {
                 .toList();
     }
 
+    /**
+     * Retrieves a user by ID.
+     *
+     * @param id user ID
+     * @return user details
+     */
     public UserResponse getUserById(Integer id) {
         var user = userRepository.findUserById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -57,6 +68,12 @@ public class UserService {
                 .build();
     }
 
+    /**
+     * Retrieves groups of a user.
+     *
+     * @param userId user ID
+     * @return list of groups
+     */
     private List<UserGroupResponse> getGroupsByUserId(Integer userId) {
         return userRepository.findGroupsByUserId(userId)
                 .stream()
@@ -69,6 +86,12 @@ public class UserService {
                 .toList();
     }
 
+    /**
+     * Creates a user.
+     *
+     * @param request user data
+     * @return created user
+     */
     public UserResponse createUser(UserRequest request) {
 
         if (userRepository.countByEmail(request.getEmail()) > 0) {
@@ -78,7 +101,10 @@ public class UserService {
         var user = new User();
 
         user.setEmail(request.getEmail());
+
+        // Store password in encrypted form
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+
         user.setFullname(request.getFullname());
         user.setPhoneNumber(request.getPhoneNumber());
         user.setStatus(
@@ -93,15 +119,25 @@ public class UserService {
         return getUserById(user.getId());
     }
 
+    /**
+     * Updates a user.
+     *
+     * @param id user ID
+     * @param request user data
+     * @return updated user
+     */
     public UserResponse updateUser(Integer id, UserRequest request) {
 
         var user = userRepository.findActiveEntityById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+
+            // Exclude current user when checking duplicate email
             if (userRepository.countByEmailExceptId(request.getEmail(), id) > 0) {
                 throw new RuntimeException("Email already exists");
             }
+
             user.setEmail(request.getEmail());
         }
 
@@ -118,6 +154,7 @@ public class UserService {
         }
 
         if (request.getPassword() != null) {
+            // Store password in encrypted form
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
@@ -130,23 +167,36 @@ public class UserService {
         return getUserById(user.getId());
     }
 
+    /**
+     * Deletes a user.
+     *
+     * @param id user ID
+     */
     public void deleteUser(Integer id) {
         var user = userRepository.findActiveEntityById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         user.setDeletedAt(LocalDateTime.now());
 
+        // Make email unique after soft delete
         user.setEmail(user.getEmail() + "_deleted_" + System.currentTimeMillis());
 
         userRepository.save(user);
     }
 
+    /**
+     * Synchronizes user group.
+     *
+     * @param user user entity
+     * @param groupIds group IDs
+     */
     private void syncUserGroups(User user, List<Integer> groupIds) {
 
         if (groupIds == null || groupIds.isEmpty()) {
             return;
         }
 
+        // Only one group is supported
         Integer newGroupId = groupIds.get(0);
 
         List<UserGroupProjection> currentGroups = userRepository.findGroupsByUserId(user.getId());
@@ -158,6 +208,7 @@ public class UserService {
             return;
         }
 
+        // Remove old group relationships before assigning a new one
         userGroupRepository.softDeleteAllByUserId(user.getId());
 
         var group = groupRepository.findById(newGroupId)
@@ -168,6 +219,8 @@ public class UserService {
                 newGroupId);
 
         if (oldUserGroup.isPresent()) {
+
+            // Restore soft-deleted relationship
             var userGroup = oldUserGroup.get();
             userGroup.setDeletedAt(null);
             userGroupRepository.save(userGroup);
@@ -181,6 +234,13 @@ public class UserService {
         userGroupRepository.save(userGroup);
     }
 
+    /**
+     * Retrieves users with pagination.
+     *
+     * @param skip number of records to skip
+     * @param take number of records to retrieve
+     * @return paginated users
+     */
     public PaginationResponse<UserResponse> getAllUsersPaging(Integer skip, Integer take) {
 
         if (skip == null || skip < 0) {
@@ -191,6 +251,7 @@ public class UserService {
             take = 10;
         }
 
+        // Limit page size to prevent large queries
         if (take > 100) {
             take = 100;
         }

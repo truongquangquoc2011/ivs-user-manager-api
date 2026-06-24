@@ -11,8 +11,17 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository for profile data access.
+ */
 public interface ProfileRepository extends JpaRepository<User, Integer> {
 
+    /**
+     * Retrieves profile information by email.
+     *
+     * @param email user email
+     * @return profile details
+     */
     @Query(value = """
             SELECT
                 u.id AS id,
@@ -28,6 +37,12 @@ public interface ProfileRepository extends JpaRepository<User, Integer> {
             """, nativeQuery = true)
     Optional<ProfileProjection> findProfileByEmail(@Param("email") String email);
 
+    /**
+     * Retrieves an active user entity by email.
+     *
+     * @param email user email
+     * @return user entity
+     */
     @Query(value = """
             SELECT *
             FROM users u
@@ -37,6 +52,12 @@ public interface ProfileRepository extends JpaRepository<User, Integer> {
             """, nativeQuery = true)
     Optional<User> findActiveEntityByEmail(@Param("email") String email);
 
+    /**
+     * Retrieves groups of a user.
+     *
+     * @param email user email
+     * @return list of groups
+     */
     @Query(value = """
             SELECT
                 g.id AS id,
@@ -57,6 +78,12 @@ public interface ProfileRepository extends JpaRepository<User, Integer> {
             """, nativeQuery = true)
     List<ProfileGroupProjection> findGroupsByEmail(@Param("email") String email);
 
+    /**
+     * Retrieves permissions of a user.
+     *
+     * @param email user email
+     * @return list of permissions
+     */
     @Query(value = """
             SELECT
                 f.code AS featureCode,
